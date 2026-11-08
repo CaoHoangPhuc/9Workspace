@@ -169,6 +169,10 @@
 				<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC-BY 4.0</a>.
 			</div>
 
+			<div class="text-xs text-gray-400 dark:text-gray-500 pt-1">
+				9Workspace is powered by <a href="https://github.com/open-webui/open-webui" target="_blank" class="underline hover:text-gray-600 dark:hover:text-gray-300">Open WebUI</a> (c) Open WebUI Inc.
+			</div>
+
 			<div class="text-xs text-gray-400 dark:text-gray-500">
 				<!-- LICENSE covers this Open WebUI copyright attribution.
 				Do not alter, remove, obscure, or replace it except as LICENSE permits:
