@@ -360,8 +360,8 @@
 		[];
 
 	let imageGenerationEnabled = false;
-	let webSearchEnabled = false;
-	let codeInterpreterEnabled = false;
+	let webSearchEnabled = true;
+	let codeInterpreterEnabled = true;
 	let webSearchActive = false;
 	let showWebSearchConfirm = false;
 	let pendingWebSearchPrompt: string | null = null;
@@ -857,9 +857,9 @@
 			selectedToolIds = input.selectedToolIds ?? [];
 			selectedSkillIds = input.selectedSkillIds ?? [];
 			selectedFilterIds = input.selectedFilterIds ?? [];
-			webSearchEnabled = input.webSearchEnabled ?? false;
+			webSearchEnabled = input.webSearchEnabled ?? true;
 			imageGenerationEnabled = input.imageGenerationEnabled ?? false;
-			codeInterpreterEnabled = input.codeInterpreterEnabled ?? false;
+			codeInterpreterEnabled = input.codeInterpreterEnabled ?? true;
 			// Ignore approval modes in older drafts. Restoring input must not overwrite chat
 			// parameters or invoke the change handler, which can save settings and approve tools.
 			return true;
@@ -940,9 +940,9 @@
 		selectedToolIds = [];
 		selectedSkillIds = [];
 		selectedFilterIds = [];
-		webSearchEnabled = false;
+		webSearchEnabled = true;
 		imageGenerationEnabled = false;
-		codeInterpreterEnabled = false;
+		codeInterpreterEnabled = true;
 
 		if (chatIdProp) {
 			await loadChat(signal);
@@ -982,9 +982,9 @@
 		selectedToolIds = [];
 		selectedSkillIds = [];
 		selectedFilterIds = [];
-		webSearchEnabled = false;
+		webSearchEnabled = true;
 		imageGenerationEnabled = false;
-		codeInterpreterEnabled = false;
+		codeInterpreterEnabled = true;
 		prompt = '';
 		messageInput?.setText('');
 		await chatId.set('');
@@ -1053,9 +1053,9 @@
 		selectedSkillIds = [];
 		selectedFilterIds = [];
 		pendingOAuthTools = [];
-		webSearchEnabled = false;
+		webSearchEnabled = true;
 		imageGenerationEnabled = false;
-		codeInterpreterEnabled = false;
+		codeInterpreterEnabled = true;
 
 		if (selectedModelIds.filter((id) => id).length > 0) {
 			await setDefaults();
@@ -1117,9 +1117,17 @@
 				supports(feature) &&
 				$config?.features?.[`enable_${feature}`] &&
 				($user?.role === 'admin' || $user?.permissions?.features?.[feature]);
-			const defaultFeature = (feature: 'web_search' | 'image_generation' | 'code_interpreter') =>
-				featureAvailable(feature) &&
-				currentModels.every((model) => model.info?.meta?.defaultFeatureIds?.includes(feature));
+			const defaultFeature = (feature: 'web_search' | 'image_generation' | 'code_interpreter') => {
+				if (!featureAvailable(feature)) return false;
+				if (feature === 'web_search' || feature === 'code_interpreter') {
+					const explicitlyDisabled = currentModels.some((model) => {
+						const defaultIds = model.info?.meta?.defaultFeatureIds;
+						return Array.isArray(defaultIds) && !defaultIds.includes(feature);
+					});
+					return !explicitlyDisabled;
+				}
+				return currentModels.every((model) => model.info?.meta?.defaultFeatureIds?.includes(feature));
+			};
 			const terminalId = currentModels[0]?.info?.meta?.terminalId;
 			const defaults: Record<string, any> = {
 				selectedToolIds: [

@@ -25,8 +25,9 @@ def search_external(
             # Do not alter, remove, obscure, or replace it except as LICENSE permits:
             # https://docs.openwebui.com/license.
             'User-Agent': 'Open WebUI (https://github.com/open-webui/open-webui) RAG Bot',
-            'Authorization': f'Bearer {external_api_key}',
         }
+        if external_api_key:
+            headers['Authorization'] = f'Bearer {external_api_key}'
         headers = include_user_info_headers(headers, user)
 
         chat_id = getattr(request.state, 'chat_id', None)
@@ -39,19 +40,26 @@ def search_external(
             json={
                 'query': query,
                 'count': count,
+                'model': 'ag',
+                'search_type': 'web',
+                'max_results': count,
             },
+            timeout=30,
         )
         response.raise_for_status()
         results = response.json()
+        if isinstance(results, dict):
+            results = results.get('results', [])
         if filter_list:
             results = get_filtered_results(results, filter_list)
         results = [
             SearchResult(
-                link=result.get('link'),
-                title=result.get('title'),
-                snippet=result.get('snippet'),
+                link=result.get('link') or result.get('url', ''),
+                title=result.get('title') or '',
+                snippet=result.get('content') or result.get('snippet') or '',
             )
             for result in results[:count]
+            if result.get('link') or result.get('url')
         ]
         log.info('External search results: %s', results)
         return results

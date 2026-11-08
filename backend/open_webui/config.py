@@ -1711,7 +1711,13 @@ except Exception as e:
     log.exception(f'Error loading DEFAULT_MODEL_METADATA: {e}')
     default_model_metadata = {}
 
-DEFAULT_MODEL_METADATA = default_model_metadata
+DEFAULT_MODEL_METADATA = default_model_metadata or {
+    'capabilities': {
+        'web_search': True,
+        'code_interpreter': True,
+    },
+    'defaultFeatureIds': ['web_search', 'code_interpreter'],
+}
 
 try:
     default_model_params = JSONCodec.loads(os.getenv('DEFAULT_MODEL_PARAMS', '{}'))
